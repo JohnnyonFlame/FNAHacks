@@ -13,6 +13,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 using SDL2;
 
@@ -1344,6 +1345,27 @@ namespace Microsoft.Xna.Framework
 						);
 					}
 				}
+
+				// Lie about the resolutions...
+				string forceModes = Environment.GetEnvironmentVariable("FNA3D_FORCE_MODES");
+				if (forceModes != null)
+				{
+					MatchCollection matches = Regex.Matches(forceModes, @"(\d+)x(\d+)");
+					if (matches.Count != 0)
+					{
+						foreach (Match match in matches)
+						{
+							modes.Add(
+								new DisplayMode(
+									ushort.Parse(match.Groups[1].ToString()),
+									ushort.Parse(match.Groups[2].ToString()),
+									SurfaceFormat.Color
+								)
+							);
+						}
+					}
+				}
+
 				adapters[i] = new GraphicsAdapter(
 					new DisplayModeCollection(modes),
 					@"\\.\DISPLAY" + (i + 1).ToString(),

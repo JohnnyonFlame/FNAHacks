@@ -11,6 +11,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
+using System.Linq;
 
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
@@ -21,6 +23,13 @@ using Microsoft.Xna.Framework.Input.Touch;
 
 namespace Microsoft.Xna.Framework
 {
+	/* For reflection. */
+	[AttributeUsage(AttributeTargets.Class)]
+	public class ModEntryPointAttribute : Attribute
+	{
+
+	}
+
 	public class Game : IDisposable
 	{
 		#region Public Properties
@@ -771,6 +780,32 @@ namespace Microsoft.Xna.Framework
 			if (graphicsDeviceManager != null)
 			{
 				graphicsDeviceManager.CreateDevice();
+			}
+
+			/* We're going to apply any necessary game patches for this
+			 * game package, to ensure compatibility and full functionality.
+			 */
+			try
+			{
+				Console.Out.WriteLine("Attempting to patch...");
+				var patchfile = Environment.GetEnvironmentVariable("FNA_PATCH");
+				if (patchfile.Length > 0) {
+					var assembly = Assembly.LoadFrom(patchfile);
+					foreach (var type in assembly.GetTypes()
+					        .Where(t => Attribute.IsDefined(t, typeof(ModEntryPointAttribute))))
+					{
+						MethodInfo method = type.GetMethod("Main");
+						Console.Out.WriteLine("Attempting to use {0} (Main: {1})", type.ToString(), method.ToString());
+						if (method != null)
+						{
+							method.Invoke(null, null);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+					Console.WriteLine("Failed to load Patch {0}", ex.Message);
 			}
 
 			Initialize();

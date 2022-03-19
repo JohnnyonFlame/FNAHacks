@@ -1240,6 +1240,7 @@ namespace Microsoft.Xna.Framework
 				{
 					// Lie about the resolutions...
 					SDL.SDL_GetDisplayMode(i, 0, out filler);
+					FNALoggerEXT.LogWarn("Forcing modes, max: " + filler.w.ToString() + "x" + filler.h.ToString());
 
 					MatchCollection matches = Regex.Matches(forceModes, @"(\d+)x(\d+)");
 					if (matches.Count != 0)
@@ -1252,9 +1253,14 @@ namespace Microsoft.Xna.Framework
 							// Add only modes that fit within the available display modes.
 							if (width <= filler.w && height <= filler.h)
 							{
+								FNALoggerEXT.LogWarn("Adding mode " + width.ToString() + "x" + height.ToString());
 								modes.Add(
 									new DisplayMode(width, height, SurfaceFormat.Color)
 								);
+							}
+							else
+							{
+								FNALoggerEXT.LogWarn("Skipping mode " + width.ToString() + "x" + height.ToString());
 							}
 						}
 					}

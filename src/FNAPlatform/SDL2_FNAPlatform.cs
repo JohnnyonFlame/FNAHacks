@@ -1207,47 +1207,55 @@ namespace Microsoft.Xna.Framework
 			{
 				List<DisplayMode> modes = new List<DisplayMode>();
 				int numModes = SDL.SDL_GetNumDisplayModes(i);
-				for (int j = numModes - 1; j >= 0; j -= 1)
-				{
-					SDL.SDL_GetDisplayMode(i, j, out filler);
+				string forceModes = Environment.GetEnvironmentVariable("FNA3D_FORCE_MODES");
 
-					// Check for dupes caused by varying refresh rates.
-					bool dupe = false;
-					foreach (DisplayMode mode in modes)
+				if (forceModes == null)
+				{
+					for (int j = numModes - 1; j >= 0; j -= 1)
 					{
-						if (filler.w == mode.Width && filler.h == mode.Height)
+						SDL.SDL_GetDisplayMode(i, j, out filler);
+
+						// Check for dupes caused by varying refresh rates.
+						bool dupe = false;
+						foreach (DisplayMode mode in modes)
 						{
-							dupe = true;
+							if (filler.w == mode.Width && filler.h == mode.Height)
+							{
+								dupe = true;
+							}
+						}
+						if (!dupe)
+						{
+							modes.Add(
+								new DisplayMode(
+									filler.w,
+									filler.h,
+									SurfaceFormat.Color // FIXME: Assumption!
+								)
+							);
 						}
 					}
-					if (!dupe)
-					{
-						modes.Add(
-							new DisplayMode(
-								filler.w,
-								filler.h,
-								SurfaceFormat.Color // FIXME: Assumption!
-							)
-						);
-					}
 				}
-
-				// Lie about the resolutions...
-				string forceModes = Environment.GetEnvironmentVariable("FNA3D_FORCE_MODES");
-				if (forceModes != null)
+				else
 				{
+					// Lie about the resolutions...
+					SDL.SDL_GetDisplayMode(i, 0, out filler);
+
 					MatchCollection matches = Regex.Matches(forceModes, @"(\d+)x(\d+)");
 					if (matches.Count != 0)
 					{
 						foreach (Match match in matches)
 						{
-							modes.Add(
-								new DisplayMode(
-									ushort.Parse(match.Groups[1].ToString()),
-									ushort.Parse(match.Groups[2].ToString()),
-									SurfaceFormat.Color
-								)
-							);
+							ushort width = ushort.Parse(match.Groups[1].ToString());
+							ushort height = ushort.Parse(match.Groups[2].ToString());
+
+							// Add only modes that fit within the available display modes.
+							if (width <= filler.w && height <= filler.h)
+							{
+								modes.Add(
+									new DisplayMode(width, height, SurfaceFormat.Color)
+								);
+							}
 						}
 					}
 				}

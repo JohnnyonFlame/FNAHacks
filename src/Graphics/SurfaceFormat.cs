@@ -116,5 +116,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// BC7 block texture format where the R/G/B values are non-linear sRGB.
 		/// </summary>
 		Bc7SrgbEXT,
+		/// <summary>
+		/// ASTC block 4x4 texture format where the R/G/B values are linear RGB.
+		/// </summary>
+		Astc4x4EXT,
 	}
 }

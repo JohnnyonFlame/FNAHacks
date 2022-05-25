@@ -4,9 +4,10 @@
 [submodule "lib/FAudio"]
 	path = lib/FAudio
 	url = https://github.com/FNA-XNA/FAudio
-[submodule "lib/FNA3D"]
-	path = lib/FNA3D
-	url = https://github.com/FNA-XNA/FNA3D
 [submodule "lib/Theorafile"]
 	path = lib/Theorafile
 	url = https://github.com/FNA-XNA/Theorafile
+[submodule "lib/FNA3D"]
+	path = lib/FNA3D
+	url = https://github.com/JohnnyonFlame/FNA3DHacks
+	branch = fna3dhacks

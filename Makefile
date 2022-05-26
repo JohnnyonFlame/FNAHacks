@@ -3,6 +3,7 @@
 
 # Source Lists
 SRC = \
+	src/Audio/Vorbisfile.cs \
 	src/Audio/AudioCategory.cs \
 	src/Audio/AudioChannels.cs \
 	src/Audio/AudioEmitter.cs \

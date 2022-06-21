@@ -130,6 +130,7 @@ namespace Microsoft.Xna.Framework.Audio
 		internal uint sampleRate;
 		internal uint loopStart;
 		internal uint loopLength;
+		internal bool needsFreeing;
 
 		#endregion
 
@@ -144,6 +145,30 @@ namespace Microsoft.Xna.Framework.Audio
 			buffer,
 			0,
 			buffer.Length,
+			null,
+			1,
+			(ushort) channels,
+			(uint) sampleRate,
+			(uint) (sampleRate * ((ushort) channels * 2)),
+			(ushort) ((ushort) channels * 2),
+			16,
+			0,
+			0
+		) {
+		}
+
+		public SoundEffect(
+			IntPtr buffer,
+			bool needsFreeing,
+			int bufferLength,
+			int sampleRate,
+			AudioChannels channels
+		) : this(
+			null,
+			buffer,
+			needsFreeing,
+			0,
+			bufferLength,
 			null,
 			1,
 			(ushort) channels,
@@ -206,6 +231,7 @@ namespace Microsoft.Xna.Framework.Audio
 			sampleRate = nSamplesPerSec;
 			this.loopStart = (uint) loopStart;
 			this.loopLength = (uint) loopLength;
+			this.needsFreeing = true;
 
 			/* Buffer format */
 			if (extraData == null)
@@ -283,6 +309,100 @@ namespace Microsoft.Xna.Framework.Audio
 			handle.LoopCount = 0;
 		}
 
+		internal unsafe SoundEffect(
+			string name,
+			IntPtr buffer,
+			bool needsFreeing,
+			int offset,
+			int count,
+			byte[] extraData,
+			ushort wFormatTag,
+			ushort nChannels,
+			uint nSamplesPerSec,
+			uint nAvgBytesPerSec,
+			ushort nBlockAlign,
+			ushort wBitsPerSample,
+			int loopStart,
+			int loopLength
+		) {
+			Device();
+			Name = name;
+			channels = nChannels;
+			sampleRate = nSamplesPerSec;
+			this.loopStart = (uint) loopStart;
+			this.loopLength = (uint) loopLength;
+			this.needsFreeing = needsFreeing;
+
+			/* Buffer format */
+			if (extraData == null)
+			{
+				formatPtr = Marshal.AllocHGlobal(
+					Marshal.SizeOf(typeof(FAudio.FAudioWaveFormatEx))
+				);
+			}
+			else
+			{
+				formatPtr = Marshal.AllocHGlobal(
+					Marshal.SizeOf(typeof(FAudio.FAudioWaveFormatEx)) +
+					extraData.Length
+				);
+				Marshal.Copy(
+					extraData,
+					0,
+					formatPtr + Marshal.SizeOf(typeof(FAudio.FAudioWaveFormatEx)),
+					extraData.Length
+				);
+			}
+
+			FAudio.FAudioWaveFormatEx* pcm = (FAudio.FAudioWaveFormatEx*) formatPtr;
+			pcm->wFormatTag = wFormatTag;
+			pcm->nChannels = nChannels;
+			pcm->nSamplesPerSec = nSamplesPerSec;
+			pcm->nAvgBytesPerSec = nAvgBytesPerSec;
+			pcm->nBlockAlign = nBlockAlign;
+			pcm->wBitsPerSample = wBitsPerSample;
+			pcm->cbSize = (ushort) ((extraData == null) ? 0 : extraData.Length);
+
+			/* Easy stuff */
+			handle = new FAudio.FAudioBuffer();
+			handle.Flags = FAudio.FAUDIO_END_OF_STREAM;
+			handle.pContext = IntPtr.Zero;
+
+			/* Buffer data */
+			handle.AudioBytes = (uint) count;
+			handle.pAudioData = buffer;
+
+			/* Play regions */
+			handle.PlayBegin = 0;
+			if (wFormatTag == 1)
+			{
+				handle.PlayLength = (uint) (
+					count /
+					nChannels /
+					(wBitsPerSample / 8)
+				);
+			}
+			else if (wFormatTag == 2)
+			{
+				handle.PlayLength = (uint) (
+					count /
+					nBlockAlign *
+					(((nBlockAlign / nChannels) - 6) * 2)
+				);
+			}
+			else if (wFormatTag == 0x166)
+			{
+				FAudio.FAudioXMA2WaveFormatEx* xma2 = (FAudio.FAudioXMA2WaveFormatEx*) formatPtr;
+				// dwSamplesEncoded / nChannels / (wBitsPerSample / 8) doesn't always (if ever?) match up.
+				handle.PlayLength = xma2->dwPlayLength;
+			}
+
+			/* Set by Instances! */
+			handle.LoopBegin = 0;
+			handle.LoopLength = 0;
+			handle.LoopCount = 0;
+		}
+
 		#endregion
 
 		#region Destructor
@@ -320,8 +440,11 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 				}
 				Instances.Clear();
-				FNAPlatform.Free(formatPtr);
-				FNAPlatform.Free(handle.pAudioData);
+				if (this.needsFreeing)
+				{
+					FNAPlatform.Free(formatPtr);
+					FNAPlatform.Free(handle.pAudioData);
+				}
 				IsDisposed = true;
 			}
 		}

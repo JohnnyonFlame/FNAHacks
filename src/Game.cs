@@ -788,17 +788,20 @@ namespace Microsoft.Xna.Framework
 			try
 			{
 				Console.Out.WriteLine("Attempting to patch...");
-				var patchfile = Environment.GetEnvironmentVariable("FNA_PATCH");
-				if (patchfile.Length > 0) {
+				string patchfile = Environment.GetEnvironmentVariable("FNA_PATCH");
+				if (!String.IsNullOrEmpty(patchfile)) {
 					var assembly = Assembly.LoadFrom(patchfile);
-					foreach (var type in assembly.GetTypes()
-					        .Where(t => Attribute.IsDefined(t, typeof(ModEntryPointAttribute))))
+					if (assembly != null)
 					{
-						MethodInfo method = type.GetMethod("Main");
-						Console.Out.WriteLine("Attempting to use {0} (Main: {1})", type.ToString(), method.ToString());
-						if (method != null)
+						foreach (var type in assembly.GetTypes()
+						        .Where(t => Attribute.IsDefined(t, typeof(ModEntryPointAttribute))))
 						{
-							method.Invoke(null, null);
+							MethodInfo method = type.GetMethod("Main");
+							Console.Out.WriteLine("Attempting to use {0} (Main: {1})", type.ToString(), method.ToString());
+							if (method != null)
+							{
+								method.Invoke(null, null);
+							}
 						}
 					}
 				}

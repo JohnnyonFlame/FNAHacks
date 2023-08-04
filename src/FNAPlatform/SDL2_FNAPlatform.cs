@@ -1322,8 +1322,7 @@ namespace Microsoft.Xna.Framework
 				List<DisplayMode> modes = new List<DisplayMode>();
 				int numModes = SDL.SDL_GetNumDisplayModes(i);
 				string forceModes = Environment.GetEnvironmentVariable("FNA3D_FORCE_MODES");
-
-				if (forceModes == null)
+				if (String.IsNullOrEmpty(forceModes))
 				{
 					for (int j = numModes - 1; j >= 0; j -= 1)
 					{

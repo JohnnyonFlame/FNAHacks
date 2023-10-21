@@ -440,9 +440,9 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 				}
 				Instances.Clear();
+				FNAPlatform.Free(formatPtr);
 				if (this.needsFreeing)
 				{
-					FNAPlatform.Free(formatPtr);
 					FNAPlatform.Free(handle.pAudioData);
 				}
 				IsDisposed = true;

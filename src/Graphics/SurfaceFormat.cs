@@ -120,5 +120,17 @@ namespace Microsoft.Xna.Framework.Graphics
 		/// ASTC block 4x4 texture format where the R/G/B values are linear RGB.
 		/// </summary>
 		Astc4x4EXT,
+		/// <summary>
+		/// ASTC block 5x5 texture format where the R/G/B values are linear RGB.
+		/// </summary>
+		Astc5x5EXT,
+		/// <summary>
+		/// ASTC block 5x5 texture format where the R/G/B values are linear RGB.
+		/// </summary>
+		Astc6x6EXT,
+		/// <summary>
+		/// ASTC block 5x5 texture format where the R/G/B values are linear RGB.
+		/// </summary>
+		Astc8x8EXT,
 	}
 }

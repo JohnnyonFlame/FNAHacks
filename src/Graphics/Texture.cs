@@ -77,7 +77,14 @@ namespace Microsoft.Xna.Framework.Graphics
 				case SurfaceFormat.Dxt5SrgbEXT:
 				case SurfaceFormat.Bc7EXT:
 				case SurfaceFormat.Bc7SrgbEXT:
+				case SurfaceFormat.Astc4x4EXT:
 					return 16;
+				case SurfaceFormat.Astc5x5EXT:
+					return 25;
+				case SurfaceFormat.Astc6x6EXT:
+					return 36;
+				case SurfaceFormat.Astc8x8EXT:
+					return 64;
 				case SurfaceFormat.Alpha8:
 				case SurfaceFormat.Bgr565:
 				case SurfaceFormat.Bgra4444:
@@ -114,9 +121,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				case SurfaceFormat.Dxt5SrgbEXT:
 				case SurfaceFormat.Bc7EXT:
 				case SurfaceFormat.Bc7SrgbEXT:
+				case SurfaceFormat.Astc4x4EXT:
+				case SurfaceFormat.Astc5x5EXT:
+				case SurfaceFormat.Astc6x6EXT:
+				case SurfaceFormat.Astc8x8EXT:
 					return 16;
 				case SurfaceFormat.Alpha8:
-				case SurfaceFormat.Astc4x4EXT:
 					return 1;
 				case SurfaceFormat.Bgr565:
 				case SurfaceFormat.Bgra4444:
